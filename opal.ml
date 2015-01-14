@@ -32,6 +32,7 @@ let explode s =
   String.iter (fun c -> l := c :: !l) s;
   List.rev !l
 
+let (%) f g = fun x -> g (f x)
 
 type 'token input = 'token LazyStream.t
 type ('token, 'result) parser = 'token input -> ('result * 'token input) option
@@ -58,6 +59,11 @@ let (<|>) x y =
     | Some _ as ret -> ret
     | None -> y input
 
+let rec scan x input =
+  match x input with
+  | Some(result', input') -> LazyStream.Cons(result', lazy (scan x input'))
+  | None -> LazyStream.Nil
+
 let mzero _ = None
 
 let any = function
@@ -67,14 +73,15 @@ let any = function
 let satisfy test =
   any >>= (fun res -> if test res then return res else mzero)
 
-let eos x = function
-  | LazyStream.Nil -> x
-  | _ -> mzero
+let eof x = function
+  | LazyStream.Nil -> Some(x, LazyStream.Nil)
+  | _ -> None
 
 
-(* common combinators *)
 
-let (^^) x f = x >>= fun r -> return (f r)
+(* utility combinators *)
+
+let (=>) x f = x >>= fun r -> return (f r)
 let (>>) x y = x >>= fun _ -> y
 let (<<) x y = x >>= fun r -> y >>= fun _ -> return r
 let (<~>) x xs = x >>= fun r -> xs >>= fun rs -> return (r :: rs)
@@ -117,31 +124,37 @@ let rec chainr1 x op =
 let chainr x op default = chainr1 x op <|> return default
 
 
+(* singletons *)
+
+let exactly x = satisfy ((=) x)
+let one_of  l = satisfy (fun x -> List.mem x l)
+let none_of l = satisfy (fun x -> not (List.mem l x))
+let range l r = satisfy (fun x -> l <= x && x <= r)
+
+
 (* char parsers *)
 
-let one_of s = satisfy (String.contains s)
-let none_of s = satisfy (fun c -> not (String.contains s c))
-
-let char c = satisfy ((=) c)
-
-let rec char_list = function
-  | [] -> return []
-  | h :: t -> char h <~> char_list t
-
-let string s = char_list (explode s)
-
-let space     = one_of " \t\r\n"
+let space     = one_of [' '; '\t'; '\r'; '\n']
 let spaces    = skip_many space
-let newline   = char 'n'
-let tab       = char '\t'
-let upper     = satisfy (fun c -> 'A' <= c && c <= 'Z')
-let lower     = satisfy (fun c -> 'a' <= c && c <= 'z')
-let digit     = satisfy (fun c -> '0' <= c && c <= '9')
+let newline   = exactly '\n'
+let tab       = exactly '\t'
+let upper     = range 'A' 'Z'
+let lower     = range 'a' 'z'
+let digit     = range '0' '9'
 let letter    = lower  <|> upper
 let alpha_num = letter <|> digit
-let hex_digit = satisfy (fun c -> 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F')
-let oct_digit = satisfy (fun c -> '0' <= c && c <= '7')
+let hex_digit = range 'a' 'f' <|> range 'A' 'F'
+let oct_digit = range '0' '7'
 
 
-(* lexer helper *)
-let lexeme x = x >>= fun res -> spaces >> return res
+(* lex helper *)
+
+let lexeme x = spaces >> x
+
+let token s =
+  let rec loop s i =
+    if i >= String.length s
+    then return s
+    else exactly s.[i] >> loop s (i + 1)
+  in
+  lexeme (loop s 0)
