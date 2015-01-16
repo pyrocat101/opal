@@ -1,6 +1,6 @@
 (*
-  While language - a Hackerrank FP challenge:
-    https://www.hackerrank.com/challenges/while-language-fp
+  While Language - a Hackerrank FP challenge:
+  https://www.hackerrank.com/challenges/while-language-fp
 
   Program ::= Stmts
   Stmts ::= Stmt | Stmt ';' Stmts
@@ -22,26 +22,17 @@
   Identifier ::= [A-Za-z][a-zA-Z0-9]*
 *)
 
-(* inclusion of opal.ml *)
-
+(* ----------------------------- opal.ml START ------------------------------ *)
 module LazyStream = struct
-  type 'a t =
-    | Cons of 'a * 'a t Lazy.t
-    | Nil
-
+  type 'a t = Cons of 'a * 'a t Lazy.t | Nil
   let of_stream stream =
     let rec next stream =
       try Cons(Stream.next stream, lazy (next stream))
       with Stream.Failure -> Nil
     in
     next stream
-
-  let of_string str =
-    str |> Stream.of_string |> of_stream
-
-  let of_channel ic =
-    ic |> Stream.of_channel |> of_stream
-
+  let of_string str = str |> Stream.of_string |> of_stream
+  let of_channel ic = ic |> Stream.of_channel |> of_stream
   let of_function f =
     let rec next f =
       match f () with
@@ -50,116 +41,67 @@ module LazyStream = struct
     in
     next f
 end
-
 let implode l = String.concat "" (List.map (String.make 1) l)
-
 let explode s =
   let l = ref [] in
   String.iter (fun c -> l := c :: !l) s;
   List.rev !l
-
 let (%) f g = fun x -> g (f x)
-
 type 'token input = 'token LazyStream.t
 type ('token, 'result) parser = 'token input -> ('result * 'token input) option
-
 let parse parser input =
   match parser input with
   | Some(res, _) -> Some res
   | None -> None
-
-
-(* primitives *)
-
 let return x input = Some(x, input)
-
 let (>>=) x f =
   fun input ->
     match x input with
     | Some(result', input') -> f result' input'
     | None -> None
-
 let (<|>) x y =
   fun input ->
     match x input with
     | Some _ as ret -> ret
     | None -> y input
-
 let rec scan x input =
   match x input with
   | Some(result', input') -> LazyStream.Cons(result', lazy (scan x input'))
   | None -> LazyStream.Nil
-
 let mzero _ = None
-
 let any = function
   | LazyStream.Cons(token, input') -> Some(token, Lazy.force input')
   | LazyStream.Nil -> None
-
-let satisfy test =
-  any >>= (fun res -> if test res then return res else mzero)
-
-let eof x = function
-  | LazyStream.Nil -> Some(x, LazyStream.Nil)
-  | _ -> None
-
-
-
-(* utility combinators *)
-
+let satisfy test = any >>= (fun res -> if test res then return res else mzero)
+let eof x = function LazyStream.Nil -> Some(x, LazyStream.Nil) | _ -> None
 let (=>) x f = x >>= fun r -> return (f r)
 let (>>) x y = x >>= fun _ -> y
 let (<<) x y = x >>= fun r -> y >>= fun _ -> return r
 let (<~>) x xs = x >>= fun r -> xs >>= fun rs -> return (r :: rs)
-
-let rec choice = function
-  | [] -> mzero
-  | h :: t -> h <|> choice t
-
-let rec count n x =
-  if n > 0
-  then x <~> count (n - 1) x
-  else return []
-
+let rec choice = function [] -> mzero | h :: t -> (h <|> choice t)
+let rec count n x = if n > 0 then x <~> count (n - 1) x else return []
 let between op ed x = op >> x << ed
-
 let option default x = x <|> return default
 let optional x = option () (x >> return ())
-
 let rec skip_many x = option () (x >>= fun _ -> skip_many x)
 let skip_many1 x = x >> skip_many x
-
 let rec many x = option [] (x >>= fun r -> many x >>= fun rs -> return (r :: rs))
 let many1 x = x <~> many x
-
 let sep_by1 x sep = x <~> many (sep >> x)
 let sep_by x sep = sep_by1 x sep <|> return []
-
 let end_by1 x ed = x << skip_many1 ed
 let end_by x ed = x << skip_many ed
-
 let chainl1 x op =
-  let rec loop a =
-    (op >>= fun f -> x >>= fun b -> loop (f a b)) <|> return a
-  in
+  let rec loop a = (op >>= fun f -> x >>= fun b -> loop (f a b)) <|> return a in
   x >>= loop
 let chainl x op default = chainl1 x op <|> return default
-
 let rec chainr1 x op =
   x >>= fun a -> (op >>= fun f -> chainr1 x op >>= f a) <|> return a
 let chainr x op default = chainr1 x op <|> return default
-
-
-(* singletons *)
-
 let exactly x = satisfy ((=) x)
 let one_of  l = satisfy (fun x -> List.mem x l)
 let none_of l = satisfy (fun x -> not (List.mem l x))
 let range l r = satisfy (fun x -> l <= x && x <= r)
-
-
-(* char parsers *)
-
 let space     = one_of [' '; '\t'; '\r'; '\n']
 let spaces    = skip_many space
 let newline   = exactly '\n'
@@ -171,12 +113,7 @@ let letter    = lower  <|> upper
 let alpha_num = letter <|> digit
 let hex_digit = range 'a' 'f' <|> range 'A' 'F'
 let oct_digit = range '0' '7'
-
-
-(* lex helper *)
-
 let lexeme x = spaces >> x
-
 let token s =
   let rec loop s i =
     if i >= String.length s
@@ -184,7 +121,7 @@ let token s =
     else exactly s.[i] >> loop s (i + 1)
   in
   lexeme (loop s 0)
-(* end of inclusion of opal.ml *)
+(* ------------------------------ opal.ml END ------------------------------- *)
 
 
 type exp = PlusExp of exp * exp
@@ -227,7 +164,7 @@ let ident = (spaces >> letter <~> many alpha_num) => implode >>= function
 
 let number = spaces >> many1 digit => implode % int_of_string
 
-let parens x = between (token "(") (token ")") x
+let parens = between (token "(") (token ")")
 let addop = token "+" >> return (fun x y -> PlusExp(x, y))
 let subop = token "-" >> return (fun x y -> SubExp(x, y))
 let mulop = token "*" >> return (fun x y -> MulExp(x, y))
