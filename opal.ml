@@ -1,7 +1,7 @@
+(* lazy stream -------------------------------------------------------------- *)
+
 module LazyStream = struct
-  type 'a t =
-    | Cons of 'a * 'a t Lazy.t
-    | Nil
+  type 'a t = Cons of 'a * 'a t Lazy.t | Nil
 
   let of_stream stream =
     let rec next stream =
@@ -10,12 +10,6 @@ module LazyStream = struct
     in
     next stream
 
-  let of_string str =
-    str |> Stream.of_string |> of_stream
-
-  let of_channel ic =
-    ic |> Stream.of_channel |> of_stream
-
   let of_function f =
     let rec next f =
       match f () with
@@ -23,7 +17,12 @@ module LazyStream = struct
       | None -> Nil
     in
     next f
+
+  let of_string str = str |> Stream.of_string |> of_stream
+  let of_channel ic = ic |> Stream.of_channel |> of_stream
 end
+
+(* utilities ---------------------------------------------------------------- *)
 
 let implode l = String.concat "" (List.map (String.make 1) l)
 
@@ -34,16 +33,15 @@ let explode s =
 
 let (%) f g = fun x -> g (f x)
 
-type 'token input = 'token LazyStream.t
-type ('token, 'result) parser = 'token input -> ('result * 'token input) option
-
 let parse parser input =
   match parser input with
   | Some(res, _) -> Some res
   | None -> None
 
+(* primitives --------------------------------------------------------------- *)
 
-(* primitives *)
+type 'token input = 'token LazyStream.t
+type ('token, 'result) parser = 'token input -> ('result * 'token input) option
 
 let return x input = Some(x, input)
 
@@ -77,9 +75,7 @@ let eof x = function
   | LazyStream.Nil -> Some(x, LazyStream.Nil)
   | _ -> None
 
-
-
-(* utility combinators *)
+(* derived combinators ------------------------------------------------------ *)
 
 let (=>) x f = x >>= fun r -> return (f r)
 let (>>) x y = x >>= fun _ -> y
@@ -123,16 +119,14 @@ let rec chainr1 x op =
   x >>= fun a -> (op >>= fun f -> chainr1 x op >>= f a) <|> return a
 let chainr x op default = chainr1 x op <|> return default
 
-
-(* singletons *)
+(* singletons --------------------------------------------------------------- *)
 
 let exactly x = satisfy ((=) x)
 let one_of  l = satisfy (fun x -> List.mem x l)
 let none_of l = satisfy (fun x -> not (List.mem l x))
 let range l r = satisfy (fun x -> l <= x && x <= r)
 
-
-(* char parsers *)
+(* char parsers ------------------------------------------------------------- *)
 
 let space     = one_of [' '; '\t'; '\r'; '\n']
 let spaces    = skip_many space
@@ -146,8 +140,7 @@ let alpha_num = letter <|> digit
 let hex_digit = range 'a' 'f' <|> range 'A' 'F'
 let oct_digit = range '0' '7'
 
-
-(* lex helper *)
+(* lex helper --------------------------------------------------------------- *)
 
 let lexeme x = spaces >> x
 
