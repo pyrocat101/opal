@@ -41,6 +41,7 @@ let parse parser input =
 (* primitives --------------------------------------------------------------- *)
 
 type 'token input = 'token LazyStream.t
+type ('token, 'result) monad = ('result * 'token input) option
 type ('token, 'result) parser = 'token input -> ('result * 'token input) option
 
 let return x input = Some(x, input)
@@ -105,8 +106,8 @@ let many1 x = x <~> many x
 let sep_by1 x sep = x <~> many (sep >> x)
 let sep_by x sep = sep_by1 x sep <|> return []
 
-let end_by1 x ed = x << skip_many1 ed
-let end_by x ed = x << skip_many ed
+let end_by1 x sep = sep_by1 x sep << sep
+let end_by x sep = end_by1 x sep <|> return []
 
 let chainl1 x op =
   let rec loop a =

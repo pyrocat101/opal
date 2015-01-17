@@ -97,8 +97,8 @@ let rec many x = option [] (x >>= fun r -> many x >>= fun rs -> return (r :: rs)
 let many1 x = x <~> many x
 let sep_by1 x sep = x <~> many (sep >> x)
 let sep_by x sep = sep_by1 x sep <|> return []
-let end_by1 x ed = x << skip_many1 ed
-let end_by x ed = x << skip_many ed
+let end_by1 x sep = sep_by1 x sep << sep
+let end_by x sep = end_by1 x sep <|> return []
 let chainl1 x op =
   let rec loop a = (op >>= fun f -> x >>= fun b -> loop (f a b)) <|> return a in
   x >>= loop
