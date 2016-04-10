@@ -1,0 +1,13 @@
+OASISFormat: 0.4
+Name:        opal
+Version:     0.1.0
+Synopsis:    Self-contained monadic parser combinators for OCaml
+Authors:     Linjie Ding
+License:     MIT
+Plugins:     META (0.4), DevFiles (0.4)
+
+Library opal
+  Path:       src
+  BuildTools: ocamlbuild
+  Modules:    Opal
+

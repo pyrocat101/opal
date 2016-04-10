@@ -2,3 +2,5 @@ _build/*
 .ocamlinit
 *.byte
 *.native
+setup.log
+setup.data
