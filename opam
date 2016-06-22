@@ -1,6 +1,6 @@
 opam-version: "1.2"
 name: "opal"
-version: "0.1.0"
+version: "0.1.1"
 maintainer: "Linjie Ding <i@pyroc.at>"
 authors: "Linjie Ding <i@pyroc.at>"
 homepage: "https://github.com/pyrocat101/opal"
@@ -9,11 +9,10 @@ license: "MIT"
 dev-repo: "https://github.com/pyrocat101/opal.git"
 available: [ ocaml-version >= "4.01.0" ]
 build: [
-  ["ocaml" "setup.ml" "-configure" "--prefix" prefix]
-  ["ocaml" "setup.ml" "-build"]
+  ["%{make}" "ncl" "bcl"]
 ]
 install: [
-  ["ocaml" "setup.ml" "-install"]
+  ["%{make}" "libinstall"]
 ]
 remove: [
   ["ocamlfind" "remove" "opal"]

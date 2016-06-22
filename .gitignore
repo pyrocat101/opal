@@ -4,3 +4,11 @@ _build/*
 *.native
 setup.log
 setup.data
+._d/*
+*.a
+*.o
+*.cma
+*.cmi
+*.cmx
+*.cmxa
+*.cmo

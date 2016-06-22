@@ -1,0 +1,5 @@
+version = "0.1.1"
+description = "Self-contained monadic parser combinators for OCaml"
+archive(byte) = "opal.cma"
+archive(native) = "opal.cmxa"
+exists_if = "opal.cma"
