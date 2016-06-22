@@ -117,7 +117,7 @@ let chainl1 x op =
 let chainl x op default = chainl1 x op <|> return default
 
 let rec chainr1 x op =
-  x >>= fun a -> (op >>= fun f -> chainr1 x op >>= f a) <|> return a
+  x >>= fun a -> (op >>= fun f -> chainr1 x op => f a) <|> return a
 let chainr x op default = chainr1 x op <|> return default
 
 (* singletons --------------------------------------------------------------- *)
