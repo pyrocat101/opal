@@ -1,6 +1,6 @@
 SOURCES = opal.ml
 RESULT = opal
-LIBINSTALL_FILES = META opal.cma opal.cmxa opal.cmi opal.a
+LIBINSTALL_FILES = META opal.cma opal.cmxa opal.cmx opal.cmi opal.a
 
 all: ncl bcl
 

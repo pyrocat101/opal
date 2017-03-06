@@ -124,7 +124,7 @@ let chainr x op default = chainr1 x op <|> return default
 
 let exactly x = satisfy ((=) x)
 let one_of  l = satisfy (fun x -> List.mem x l)
-let none_of l = satisfy (fun x -> not (List.mem l x))
+let none_of l = satisfy (fun x -> not (List.mem x l))
 let range l r = satisfy (fun x -> l <= x && x <= r)
 
 (* char parsers ------------------------------------------------------------- *)
