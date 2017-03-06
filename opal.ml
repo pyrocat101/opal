@@ -138,7 +138,7 @@ let lower     = range 'a' 'z'
 let digit     = range '0' '9'
 let letter    = lower  <|> upper
 let alpha_num = letter <|> digit
-let hex_digit = range 'a' 'f' <|> range 'A' 'F'
+let hex_digit = range 'a' 'f' <|> range 'A' 'F' <|> digit
 let oct_digit = range '0' '7'
 
 (* lex helper --------------------------------------------------------------- *)
