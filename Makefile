@@ -1,4 +1,4 @@
-SOURCES = opal.ml
+SOURCES = opal.mli opal.ml
 RESULT = opal
 LIBINSTALL_FILES = META opal.cma opal.cmxa opal.cmx opal.cmi opal.a
 

@@ -1,3 +1,5 @@
+._bcdi/
+._ncdi/
 _build/*
 .ocamlinit
 *.byte
