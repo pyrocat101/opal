@@ -7,7 +7,7 @@ homepage: "https://github.com/pyrocat101/opal"
 bug-reports: "https://github.com/pyrocat101/opal/issues"
 license: "MIT"
 dev-repo: "https://github.com/pyrocat101/opal.git"
-available: [ ocaml-version >= "4.01.0" ]
+available: [ ocaml-version >= "4.08.0" ]
 build: [
   ["%{make}%" "ncl" "bcl"]
 ]
