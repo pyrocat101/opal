@@ -84,6 +84,7 @@ let (=>) x f = x >>= fun r -> return (f r)
 let (>>) x y = x >>= fun _ -> y
 let (<<) x y = x >>= fun r -> y >>= fun _ -> return r
 let (<~>) x xs = x >>= fun r -> xs >>= fun rs -> return (r :: rs)
+let (<~~>) x y = x >>= fun r -> y >>= fun rs -> return (r,rs)
 
 let rec choice = function
   | [] -> mzero
