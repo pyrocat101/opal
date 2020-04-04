@@ -118,6 +118,20 @@ Accepts a value and an input, and returns a monad.
 `x >>= f` returns a new parser that if parser `x` succeeds, applies function `f` 
 on monad produced by `x`, and produces a new monad (a.k.a. `bind`).
 
+**`val ( let* ) : ('t, 'r) parser -> ('r -> ('t, 'r) monad) -> ('t, 'r) parser`**
+
+This operator is the same as `>>=` but using the `let` notation.
+It is usefull to avoid ugly sequences of bindings. For exemple, `p >>= fun x -> f x` can
+be rewritten `let* x = p in f x`. Combined with the `return` function, we can define complex parsers :
+
+```ocaml
+let tuple_parser =
+  let* x = digit in
+  let* _ = exactly ',' in
+  let* y = digit in
+  return (x, y)
+```
+
 **`val ( <|> ) : ('t, 'r) parser -> ('t, 'r) parser -> ('t, 'r) parser`**
 
 Choice combinator. The parser `p <|> q` first applies `q`. If it succeeds, the

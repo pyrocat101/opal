@@ -48,15 +48,17 @@ let return x input = Some(x, input)
 
 let (>>=) x f =
   fun input ->
-    match x input with
-    | Some(result', input') -> f result' input'
-    | None -> None
+  match x input with
+  | Some(result', input') -> f result' input'
+  | None -> None
+
+let (let*) = (>>=)
 
 let (<|>) x y =
   fun input ->
-    match x input with
-    | Some _ as ret -> ret
-    | None -> y input
+  match x input with
+  | Some _ as ret -> ret
+  | None -> y input
 
 let rec scan x input =
   match x input with

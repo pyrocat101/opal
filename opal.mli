@@ -1,11 +1,11 @@
 module LazyStream :
-  sig
-    type 'a t = Cons of 'a * 'a t Lazy.t | Nil
-    val of_stream : 'a Stream.t -> 'a t
-    val of_function : (unit -> 'a option) -> 'a t
-    val of_string : string -> char t
-    val of_channel : in_channel -> char t
-  end
+sig
+  type 'a t = Cons of 'a * 'a t Lazy.t | Nil
+  val of_stream : 'a Stream.t -> 'a t
+  val of_function : (unit -> 'a option) -> 'a t
+  val of_string : string -> char t
+  val of_channel : in_channel -> char t
+end
 
 val implode : char list -> string
 val explode : string -> char list
@@ -16,6 +16,8 @@ val parse : ('token, 'a) parser -> 'token LazyStream.t -> 'a option
 
 val return : 'a -> ('token, 'a) parser
 val ( >>= ) :
+  ('token, 'a) parser -> ('a -> ('token, 'b) parser) -> ('token, 'b) parser
+val ( let* ) :
   ('token, 'a) parser -> ('a -> ('token, 'b) parser) -> ('token, 'b) parser
 val ( <|> ) : ('token, 'a) parser -> ('token, 'a) parser -> ('token, 'a) parser
 val scan : ('token, 'a) parser -> 'token LazyStream.t -> 'a LazyStream.t
