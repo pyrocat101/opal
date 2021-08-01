@@ -134,7 +134,7 @@ let tuple_parser =
 
 **`val ( <|> ) : ('t, 'r) parser -> ('t, 'r) parser -> ('t, 'r) parser`**
 
-Choice combinator. The parser `p <|> q` first applies `q`. If it succeeds, the
+Choice combinator. The parser `p <|> q` first applies `p`. If it succeeds, the
 value of `p` is returned. If `p` fails, parser `q` is tried.
 
 **`val mzero : 'a -> ('t, 'r) monad`**
