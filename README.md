@@ -145,7 +145,7 @@ A parser that always fails.
 
 The parser succeeds for any token in the input. Consumes a token and returns it.
 
-**`val satisfy : ('t, 'r) parser -> ('t -> bool) -> ('t, 'r) parser`**
+**`val satisfy : ('t -> bool) -> ('t, 'r) parser`**
 
 The parser `satisfy test` succeeds for any token for which the supplied function
 `test` returns `true`. Returns the token that is actually parsed.
