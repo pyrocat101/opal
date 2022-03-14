@@ -168,7 +168,7 @@ returned by `y`.
 
 **`val ( << ) : ('t, 'a) parser -> ('t, 'b) parser -> ('t, 'a) parser`**
 
-Ignore-right combinator. `x >> y` parses `x` and then `y`. Returns the value
+Ignore-right combinator. `x << y` parses `x` and then `y`. Returns the value
 returned by `x`.
 
 **`val ( <~> ) : ('t, 'r) parser -> ('t, 'r list) parser -> 't input -> ('t, 'r list) monad`**
