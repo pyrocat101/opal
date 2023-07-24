@@ -1,4 +1,4 @@
-(lang dune 3.6)
+(lang dune 2.9)
 
 (name opal)
 (version 0.1.1)
