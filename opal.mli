@@ -11,8 +11,9 @@ val implode : char list -> string
 val explode : string -> char list
 val ( % ) : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
 
-type ('token, 'result) parser
-val parse : ('token, 'a) parser -> 'token LazyStream.t -> 'a option
+type 'token input = 'token LazyStream.t
+type ('token, 'result) parser = 'token input -> ('result * 'token input) option
+val parse : ('token, 'a) parser -> 'token input -> 'a option
 
 val return : 'a -> ('token, 'a) parser
 val ( >>= ) :
