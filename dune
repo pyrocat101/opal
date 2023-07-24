@@ -1,0 +1,7 @@
+(library
+ (public_name opal)
+ (libraries camlp-streams))
+
+(env
+ (dev
+  (flags (:standard -warn-error -A))))
